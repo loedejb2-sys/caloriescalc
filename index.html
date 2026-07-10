@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Calorie Calculator Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f4f6f0 url('https://www.transparenttextures.com/patterns/cubes.png');
+            color: #333;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .promo-header {
+            text-align: center;
+            margin-bottom: 30px;
+            max-width: 800px;
+        }
+
+        .promo-header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            color: #111;
+        }
+
+        .promo-header p {
+            font-size: 1.2rem;
+            color: #444;
+            line-height: 1.5;
+        }
+
+        .dashboard-container {
+            background-color: #ffffff;
+            border: 2px solid #333;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 1200px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .header-title-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title-area i.fa-calculator {
+            font-size: 2.5rem;
+            color: #333;
+            background: #f0f4f1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .header-title-area h2 {
+            font-size: 2rem;
+            color: #4d7c59;
+            font-weight: 700;
+        }
+
+        .profile-area i {
+            font-size: 2.2rem;
+            color: #333;
+            background: #e2e8f0;
+            padding: 10px;
+            border-radius: 50%;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .meal-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #111;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: #b9ca9c;
+            color: #222;
+            font-weight: 600;
+            padding: 6px 10px;
+            border: 1px solid #d1d9c0;
+            text-align: center;
+        }
+
+        td {
+            padding: 4px 8px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            background-color: #fcfdfa;
+        }
+
+        /* Editable input fields styling */
+        input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid transparent;
+            background: transparent;
+            text-align: center;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        input:hover {
+            background: #f1f5f0;
+            border-color: #cbd5e1;
+        }
+
+        input:focus {
+            background: #fff;
+            border-color: #4d7c59;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(77, 124, 89, 0.2);
+        }
+
+        .text-left-input {
+            text-align: left;
+        }
+
+        tr.total-row td {
+            background-color: #f4f7ee;
+            font-weight: bold;
+            text-align: left;
+            padding: 10px;
+            border-top: 2px solid #b9ca9c;
+        }
+
+        tr.total-row td:last-child {
+            text-align: center;
+        }
+
+        .right-panel-card {
+            background-color: #fafbfc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .right-panel-card h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: #333;
+            letter-spacing: 0.5px;
+        }
+
+        .info-table td {
+            text-align: left;
+            background: transparent;
+            border: none;
+            padding: 4px 0;
+        }
+        .info-table td:first-child {
+            font-weight: bold;
+            width: 30%;
+        }
+        .info-table tr {
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="promo-header">
+        <h1>DON'T MISS OUT!</h1>
+        <p>Achieving your fitness goals—use a Calorie Calculator to track your intake and optimize your diet!</p>
+    </div>
+
+    <div class="dashboard-container">
+        
+        <div class="dashboard-header">
+            <div class="header-title-area">
+                <i class="fa-solid fa-calculator"></i>
+                <h2>Calorie Calculator</h2>
+            </div>
+            <div class="profile-area">
+                <i class="fa-solid fa-user-gear"></i>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <div class="left-column">
+                
+                <div class="meal-section">
+                    <div class="section-title">Breakfast</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Food Information</th>
+                                <th colspan="2">Quantity</th>
+                                <th rowspan="2">Calorie</th>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <th>Measure</th>
+                            </tr>
+                        </thead>
+                        <tbody id="breakfast-rows">
+                            <tr>
+                                <td><input type="text" class="text-left-input" value="Toast"></td>
+                                <td><input type="text" value="2"></td>
+                                <td><input type="text" value="Pieces"></td>
+                                <td><input type="number" class="cal-input" data-meal="breakfast" value="200"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" class="text-left-input" value="Scrambled Eggs"></td>
+                                <td><input type="text" value="2"></td>
+                                <td><input type="text" value="Pieces"></td>
+                                <td><input type="number" class="cal-input" data-meal="breakfast" value="140"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" class="text-left-input" value="Bacon"></td>
+                                <td><input type="text" value="3"></td>
+                                <td><input type="text" value="Pieces"></td>
+                                <td><input type="number" class="cal-input" data-meal="breakfast" value="180"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" class="text-left-input" value="Orange Juice"></td>
+                                <td><input type="text" value="1"></td>
+                                <td><input type="text" value="Cup"></td>
+                                <td><input type="number" class="cal-input" data-meal="breakfast" value="110"></td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="3">Total Calories Intake:</td>
+                                <td id="total-breakfast">630</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="meal-section">
+                    <div class="section-title">Lunch</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Food Information</th>
+                                <th colspan="2">Quantity</th>
+                                <th rowspan="2">Calorie</th>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <th>Measure</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lunch-rows">
+                            <tr>
+                                <td><input type="text" class="text-left-input" value="Grilled Chicken"></td>
+                                <td><input type="text" value="6"></td>
+                                <td><input type="text" value="OZ"></td>
+                                <td><input type="number" class="cal-input" data-meal="lunch" value="360"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" class="text-left-input" value="Brown Rice"></td>
+                                <td><input type="text" value="1"></td>
+                                <td><input type="text" value="Cup"></td>
+                                <td><input type="number" class="cal-input" data-meal="lunch" value="215"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" class="text-left-input" value="Steamed Broccoli"></td>
+                                <td><input type="text" value="1"></td>
+                                <td><input type="text" value="Cup"></td>
+                                <td><input type="number" class="cal-input" data-meal="lunch" value="55"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" class="text-left-input" value="Greek Salad"></td>
+                                <td><input type="text" value="1"></td>
+                                <td><input type="text" value="Cup"></td>
+                                <td><input type="number" class="cal-input" data-meal="lunch" value="150"></td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="3">Total Calories Intake:</td>
+                                <td id="total-lunch">780</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="meal-section">
+                    <div class="section-title">Dinner</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Food Information</th>
+                                <th colspan="2">Quantity</th>
+                                <th rowspan="2">Calorie</th>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <th>Measure</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dinner-rows">
+                            <tr>
+                                <td><input type="text" class="text-left-input" value="Baked Salmon"></td>
+                                <td><input type="text" value="8"></td>
+                                <td><input type="text" value="OZ"></td>
+                                <td><input type="number" class="cal-input" data-meal="dinner" value="400"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" class="text-left-input" value="Mashed Potatoes"></td>
+                                <td><input type="text" value="1/2"></td>
+                                <td><input type="text" value="Cup"></td>
+                                <td><input type="number" class="cal-input" data-meal="dinner" value="105"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" class="text-left-input" value="Steamed Asparagus"></td>
+                                <td><input type="text" value="1"></td>
+                                <td><input type="text" value="Cup"></td>
+                                <td><input type="number" class="cal-input" data-meal="dinner" value="40</td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" class="text-left-input" value="Dinner Roll"></td>
+                                <td><input type="text" value="1"></td>
+                                <td><input type="text" value="Roll"></td>
+                                <td><input type="number" class="cal-input" data-meal="dinner" value="110"></td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="3">Total Calories Intake:</td>
+                                <td id="total-dinner">655</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <div class="right-column">
+                
+                <div class="right-panel-card">
+                    <h3>Personal Information</h3>
+                    <table class="info-table">
+                        <tbody>
+                            <tr><td>Name:</td><td><input type="text" class="text-left-input" value="Antonette S. Jones"></td></tr>
+                            <tr><td>Age:</td><td><input type="text" class="text-left-input" value="35 years old"></td></tr>
+                            <tr><td>Gender:</td><td><input type="text" class="text-left-input" value="Female"></td></tr>
+                            <tr><td>Weight:</td><td><input type="text" class="text-left-input" value="59 kgs"></td></tr>
+                            <tr><td>Height:</td><td><input type="text" class="text-left-input" value="5'2&quot;"></td></tr>
+                            <tr><td>Dietitian:</td><td><input type="text" class="text-left-input" value="Kathryn H. Converse"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="right-panel-card">
+                    <h3>Calorie Mockup Matrix</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Markup</th>
+                                <th>Breakfast</th>
+                                <th>Lunch</th>
+                                <th>Dinner</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Ideal:</strong></td>
+                                <td><input type="number" class="mockup-input" data-type="ideal" data-meal="0" value="1000"></td>
+                                <td><input type="number" class="mockup-input" data-type="ideal" data-meal="1" value="1500"></td>
+                                <td><input type="number" class="mockup-input" data-type="ideal" data-meal="2" value="1500"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Prescribed:</strong></td>
+                                <td><input type="number" class="mockup-input" data-type="prescribed" data-meal="0" value="700"></td>
+                                <td><input type="number" class="mockup-input" data-type="prescribed" data-meal="1" value="770"></td>
+                                <td><input type="number" class="mockup-input" data-type="prescribed" data-meal="2" value="870"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Actual:</strong></td>
+                                <td id="mockup-actual-b">630</td>
+                                <td id="mockup-actual-l">780</td>
+                                <td id="mockup-actual-d">655</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Difference:</strong></td>
+                                <td id="mockup-diff-b">70</td>
+                                <td id="mockup-diff-l">-10</td>
+                                <td id="mockup-diff-d">215</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="right-panel-card">
+                    <h3>Calorie Mockup Graph</h3>
+                    <div class="chart-container">
+                        <canvas id="calorieChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Initialize dynamic Chart instance
+        const ctx = document.getElementById('calorieChart').getContext('2d');
+        const calorieChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Ideal', 'Prescribed', 'Actual', 'Difference'],
+                datasets: [
+                    { label: 'Breakfast', data: [1000, 700, 630, 70], backgroundColor: '#4d7c59' },
+                    { label: 'Lunch', data: [1500, 770, 780, -10], backgroundColor: '#8bb381' },
+                    { label: 'Dinner', data: [1500, 870, 655, 215], backgroundColor: '#b9ca9c' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: false, suggestedMin: -100, suggestedMax: 1600 }
+                },
+                plugins: {
+                    legend: { position: 'right', labels: { boxWidth: 12 } }
+                }
+            }
+        });
+
+        // Function recalculating data pipelines across tables and rendering updates to graph
+        function calculateCalories() {
+            // 1. Compute totals for individual meal logging tables
+            let breakfastTotal = 0;
+            document.querySelectorAll('.cal-input[data-meal="breakfast"]').forEach(input => {
+                breakfastTotal += Number(input.value) || 0;
+            });
+            document.getElementById('total-breakfast').innerText = breakfastTotal;
+            document.getElementById('mockup-actual-b').innerText = breakfastTotal;
+
+            let lunchTotal = 0;
+            document.querySelectorAll('.cal-input[data-meal="lunch"]').forEach(input => {
+                lunchTotal += Number(input.value) || 0;
+            });
+            document.getElementById('total-lunch').innerText = lunchTotal;
+            document.getElementById('mockup-actual-l').innerText = lunchTotal;
+
+            let dinnerTotal = 0;
+            document.querySelectorAll('.cal-input[data-meal="dinner"]').forEach(input => {
+                dinnerTotal += Number(input.value) || 0;
+            });
+            document.getElementById('total-dinner').innerText = dinnerTotal;
+            document.getElementById('mockup-actual-d').innerText = dinnerTotal;
+
+            // 2. Compute dynamic differences based on Ideal vs Actual matrix mapping
+            let idealB = Number(document.querySelector('.mockup-input[data-type="ideal"][data-meal="0"]').value) || 0;
+            let idealL = Number(document.querySelector('.mockup-input[data-type="ideal"][data-meal="1"]').value) || 0;
+            let idealD = Number(document.querySelector('.mockup-input[data-type="ideal"][data-meal="2"]').value) || 0;
+
+            let prescribedB = Number(document.querySelector('.mockup-input[data-type="prescribed"][data-meal="0"]').value) || 0;
+            let prescribedL = Number(document.querySelector('.mockup-input[data-type="prescribed"][data-meal="1"]').value) || 0;
+            let prescribedD = Number(document.querySelector('.mockup-input[data-type="prescribed"][data-meal="2"]').value) || 0;
+
+            let diffB = idealB - breakfastTotal;
+            let diffL = idealL - lunchTotal;
+            let diffD = idealD - dinnerTotal;
+
+            document.getElementById('mockup-diff-b').innerText = diffB;
+            document.getElementById('mockup-diff-l').innerText = diffL;
+            document.getElementById('mockup-diff-d').innerText = diffD;
+
+            // 3. Pump processed structural matrices directly into chart datasets
+            calorieChart.data.datasets[0].data = [idealB, prescribedB, breakfastTotal, diffB];
+            calorieChart.data.datasets[1].data = [idealL, prescribedL, lunchTotal, diffL];
+            calorieChart.data.datasets[2].data = [idealD, prescribedD, dinnerTotal, diffD];
+            
+            // Re-render chart frame 
+            calorieChart.update();
+        }
+
+        // Bind global recalculation loop to active input element updates
+        document.body.addEventListener('input', function(e) {
+            if (e.target.classList.contains('cal-input') || e.target.classList.contains('mockup-input')) {
+                calculateCalories();
+            }
+        });
+    </script>
+</body>
+</html>
