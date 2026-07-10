@@ -180,3 +180,24 @@ document.body.addEventListener('input', function(e) {
 
 // Run computations immediately on startup
 updateCalculations();
+// Tab Switching Infrastructure Execution
+function switchTab(tabId) {
+    // 1. Manage Active Class on Buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    // 2. Map structural view states to CSS selectors
+    const mealBlock = document.querySelector('.meal-section');
+    const chartBlock = document.querySelector('.chart-section');
+    const matrixBlock = document.querySelector('.matrix-section');
+
+    if (tabId === 'all') {
+        mealBlock?.classList.remove('hidden-tab');
+        chartBlock?.classList.remove('hidden-tab');
+        matrixBlock?.classList.remove('hidden-tab');
+    } else {
+        mealBlock?.classList.toggle('hidden-tab', tabId !== 'meals');
+        chartBlock?.classList.toggle('hidden-tab', tabId !== 'analytics');
+        matrixBlock?.classList.toggle('hidden-tab', tabId !== 'matrix');
+    }
+}
