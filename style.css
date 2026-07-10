@@ -1,0 +1,187 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: #f4f6f0 url('https://www.transparenttextures.com/patterns/cubes.png');
+    color: #333;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.dashboard-container {
+    background-color: #ffffff;
+    border: 2px solid #333;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.header-title-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-title-area i.fa-calculator {
+    font-size: 2.5rem;
+    color: #333;
+    background: #f0f4f1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.header-title-area h2 {
+    font-size: 2rem;
+    color: #4d7c59;
+    font-weight: 700;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 30px;
+}
+
+@media (max-width: 900px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.meal-section {
+    margin-bottom: 25px;
+}
+
+.section-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: #111;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+th {
+    background-color: #b9ca9c;
+    color: #222;
+    font-weight: 600;
+    padding: 6px 10px;
+    border: 1px solid #d1d9c0;
+    text-align: center;
+}
+
+td {
+    padding: 4px 8px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    background-color: #fcfdfa;
+}
+
+input {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    text-align: center;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+input:hover {
+    background: #f1f5f0;
+    border-color: #cbd5e1;
+}
+
+input:focus {
+    background: #fff;
+    border-color: #4d7c59;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(77, 124, 89, 0.2);
+}
+
+/* Gray styling for automatically populated inputs */
+input[readonly] {
+    background-color: #edf2f7;
+    color: #4a5568;
+    font-weight: 600;
+    cursor: not-allowed;
+    border-color: #e2e8f0;
+}
+
+.food-input {
+    text-align: left;
+}
+
+tr.total-row td {
+    background-color: #f4f7ee;
+    font-weight: bold;
+    text-align: left;
+    padding: 10px;
+    border-top: 2px solid #b9ca9c;
+}
+
+tr.total-row td:last-child {
+    text-align: center;
+}
+
+.right-panel-card {
+    background-color: #fafbfc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.right-panel-card h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    color: #333;
+    letter-spacing: 0.5px;
+}
+
+.info-table td {
+    text-align: left;
+    background: transparent;
+    border: none;
+    padding: 4px 0;
+}
+.info-table td:first-child {
+    font-weight: bold;
+    width: 30%;
+}
+.info-table tr {
+    border-bottom: 1px solid #edf2f7;
+}
+
+.chart-container {
+    position: relative;
+    height: 280px;
+    width: 100%;
+    margin-top: 10px;
+}
