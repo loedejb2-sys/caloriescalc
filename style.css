@@ -1,202 +1,205 @@
-// Initialize Chart frame architecture
-const ctx = document.getElementById('calorieChart').getContext('2d');
-const calorieChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ['Ideal', 'Prescribed', 'Actual', 'Difference'],
-        datasets: [
-            { label: 'Breakfast', data: [1000, 700, 630, 70], backgroundColor: '#4d7c59' },
-            { label: 'Lunch', data: [1500, 770, 780, -10], backgroundColor: '#8bb381' },
-            { label: 'Dinner', data: [1500, 870, 655, 215], backgroundColor: '#b9ca9c' }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: { beginAtZero: false, suggestedMin: -100, suggestedMax: 1600 }
-        },
-        plugins: {
-            legend: { position: 'right', labels: { boxWidth: 12 } }
-        }
-    }
-});
-
-// Flat database where sized variations will be compiled
-const foodDatabase = {};
-
-// Foundational structural lists to procedurally build 1,000 distinct items
-const bases = [
-    { name: "toast", cal: 100 }, { name: "egg", cal: 70 }, { name: "scrambled eggs", cal: 70 },
-    { name: "bacon", cal: 60 }, { name: "orange juice", cal: 110 }, { name: "grilled chicken", cal: 60 },
-    { name: "brown rice", cal: 215 }, { name: "steamed broccoli", cal: 55 }, { name: "greek salad", cal: 150 },
-    { name: "baked salmon", cal: 50 }, { name: "mashed potatoes", cal: 210 }, { name: "steamed asparagus", cal: 40 },
-    { name: "dinner roll", cal: 110 }, { name: "apple", cal: 95 }, { name: "banana", cal: 105 },
-    { name: "whey powder", cal: 120 }, { name: "steak", cal: 250 }, { name: "oatmeal", cal: 150 },
-    { name: "milk", cal: 120 }, { name: "yogurt", cal: 130 }, { name: "almonds", cal: 160 },
-    { name: "turkey breast", cal: 90 }, { name: "sweet potato", cal: 110 }, { name: "avocado", cal: 240 },
-    { name: "protein bar", cal: 200 }
-];
-
-const descriptors = [
-    "organic", "fresh", "diet", "premium", "low fat", "high protein", "roasted", "baked", 
-    "salted", "unsalted", "sweetened", "unsweetened", "spicy", "garlic", "honey", "maple", 
-    "smoked", "grilled", "steamed", "boiled", "crispy", "homemade", "gourmet", "classic", 
-    "light", "dark", "whole wheat", "gluten free", "natural", "extra", "raw", "cooked", 
-    "seasoned", "marinated", "shredded", "sliced", "diced", "mashed", "pureed", "creamy"
-];
-
-// Sizing scalar matrix
-const sizes = [
-    { prefix: "medium ", multiplier: 0.85 },
-    { prefix: "large ", multiplier: 1.00 },
-    { prefix: "extra large ", multiplier: 1.15 }
-];
-
-// Helper function to inject sized variants into the main database object
-function injectWithVariants(name, baseCalories) {
-    // 1. Add standard sizing variants
-    sizes.forEach(sz => {
-        const variantName = `${sz.prefix}${name}`;
-        foodDatabase[variantName] = Math.max(10, Math.round(baseCalories * sz.multiplier));
-    });
-    // 2. Add raw fallback name mapping directly to large standard size
-    foodDatabase[name] = Math.round(baseCalories);
-}
-
-// 1. Generate 1,000 unique core fitness/nutrition bases with size modifiers
-let baseCount = 0;
-while (baseCount < 1000) {
-    const base = bases[baseCount % bases.length];
-    const d1 = descriptors[Math.floor(baseCount / bases.length) % descriptors.length];
-    const d2 = descriptors[(Math.floor(baseCount / bases.length) + 1) % descriptors.length];
+/* ==========================================================================
+   Root Variables & Global Resets
+   ========================================================================== */
+:root {
+    --bg-main: #141916;
+    --bg-card: #1c2420;
+    --bg-input: #25302a;
+    --border-color: #2f3d35;
     
-    let uniqueName = `${d1} ${base.name}`;
-    if (baseCount >= bases.length * descriptors.length) {
-        uniqueName = `${d1} ${d2} ${base.name}`;
-    }
-
-    if (!foodDatabase[`large ${uniqueName}`]) {
-        const variance = d1.includes("low fat") || d1.includes("diet") || d1.includes("light") ? -25 : 15;
-        const calculatedBaseCal = Math.max(20, base.cal + (baseCount % variance));
-        
-        injectWithVariants(uniqueName, calculatedBaseCal);
-        baseCount++;
-    } else {
-        baseCount++; 
-    }
-}
-
-// 2. Generate 500 everyday/junk food items with size modifiers
-const randomBases = [
-    { name: "pizza slice", cal: 285 }, { name: "burger", cal: 540 }, { name: "french fries", cal: 365 },
-    { name: "potato chips", cal: 150 }, { name: "chocolate bar", cal: 220 }, { name: "soda can", cal: 140 },
-    { name: "donut", cal: 250 }, { name: "cookie", cal: 130 }, { name: "ice cream scoop", cal: 145 },
-    { name: "gummy bears", cal: 120 }, { name: "popcorn packet", cal: 300 }, { name: "pretzel", cal: 110 },
-    { name: "hot dog", cal: 290 }, { name: "taco", cal: 210 }, { name: "nachos", cal: 350 },
-    { name: "pancakes", cal: 280 }, { name: "waffle", cal: 220 }, { name: "muffin", cal: 340 }
-];
-
-const randomBrands = [
-    "generic", "store brand", "vending machine", "fast food", "movie theater", "party style", 
-    "gas station", "bakery", "classic", "super", "mega", "double", "triple", "mini", "jumbo", 
-    "loaded", "cheesy", "bbq", "sour cream", "buffalo", "ranch", "caramel", "vanilla", "strawberry"
-];
-
-let randomCount = 0;
-while (randomCount < 500) {
-    const rBase = randomBases[randomCount % randomBases.length];
-    const brand = randomBrands[Math.floor(randomCount / randomBases.length) % randomBrands.length];
+    --text-primary: #f0f4f1;
+    --text-muted: #a3b8ad;
     
-    const randomName = `${brand} ${rBase.name}`;
-    if (!foodDatabase[`large ${randomName}`]) {
-        const calculatedBaseCal = Math.max(50, rBase.cal + (randomCount % 40));
-        
-        injectWithVariants(randomName, calculatedBaseCal);
-        randomCount++;
-    } else {
-        randomCount++;
-    }
-}
-
-// Map ultimate core terms directly for instant matching
-bases.forEach(b => injectWithVariants(b.name, b.cal));
-randomBases.forEach(rb => injectWithVariants(rb.name, rb.cal));
-
-console.log(`Database variants built. Total tracked variations available: ${Object.keys(foodDatabase).length}`);
-
-// Central engine processing food calculations
-function updateCalculations() {
-    const meals = ['breakfast', 'lunch', 'dinner'];
-    const actuals = { breakfast: 0, lunch: 0, dinner: 0 };
-
-    meals.forEach(meal => {
-        const rows = document.querySelectorAll(`tbody[data-meal="${meal}"] tr:not(.total-row)`);
-        
-        rows.forEach(row => {
-            const foodName = row.querySelector('.food-input').value.trim().toLowerCase();
-            const amount = parseFloat(row.querySelector('.amount-input').value) || 0;
-            const calOutput = row.querySelector('.cal-output-field');
-            
-            let baseCalories = 0;
-
-            if (foodDatabase.hasOwnProperty(foodName)) {
-                baseCalories = foodDatabase[foodName];
-            } else {
-                // Fuzzy structural search matcher
-                for (const key in foodDatabase) {
-                    if (foodName.includes(key) && key.length > 3) {
-                        baseCalories = foodDatabase[key];
-                        break;
-                    }
-                }
-            }
-
-            const finalRowCalories = Math.round(baseCalories * amount);
-            calOutput.value = finalRowCalories;
-            actuals[meal] += finalRowCalories;
-        });
-
-        document.getElementById(`total-${meal}`).innerText = actuals[meal];
-    });
-
-    // Update Matrix Panels
-    document.getElementById('mockup-actual-b').innerText = actuals.breakfast;
-    document.getElementById('mockup-actual-l').innerText = actuals.lunch;
-    document.getElementById('mockup-actual-d').innerText = actuals.dinner;
-
-    let idealB = Number(document.querySelector('.mockup-input[data-type="ideal"][data-meal="0"]').value) || 0;
-    let idealL = Number(document.querySelector('.mockup-input[data-type="ideal"][data-meal="1"]').value) || 0;
-    let idealD = Number(document.querySelector('.mockup-input[data-type="ideal"][data-meal="2"]').value) || 0;
-
-    let prescribedB = Number(document.querySelector('.mockup-input[data-type="prescribed"][data-meal="0"]').value) || 0;
-    let prescribedL = Number(document.querySelector('.mockup-input[data-type="prescribed"][data-meal="1"]').value) || 0;
-    let prescribedD = Number(document.querySelector('.mockup-input[data-type="prescribed"][data-meal="2"]').value) || 0;
-
-    let diffB = idealB - actuals.breakfast;
-    let diffL = idealL - actuals.lunch;
-    let diffD = idealD - actuals.dinner;
-
-    document.getElementById('mockup-diff-b').innerText = diffB;
-    document.getElementById('mockup-diff-l').innerText = diffL;
-    document.getElementById('mockup-diff-d').innerText = diffD;
-
-    // Send updated calculation values directly into ChartJS datasets
-    calorieChart.data.datasets[0].data = [idealB, prescribedB, actuals.breakfast, diffB];
-    calorieChart.data.datasets[1].data = [idealL, prescribedL, actuals.lunch, diffL];
-    calorieChart.data.datasets[2].data = [idealD, prescribedD, actuals.dinner, diffD];
+    --accent-primary: #529b66;
+    --accent-hover: #61b377;
+    --accent-dim: #2a4033;
     
-    calorieChart.update();
+    --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --radius: 12px;
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-// Setup input update hook triggers
-document.body.addEventListener('input', function(e) {
-    if (e.target.classList.contains('food-input') || 
-        e.target.classList.contains('amount-input') || 
-        e.target.classList.contains('mockup-input')) {
-        updateCalculations();
-    }
-});
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-// Calculate metrics instantly on startup loading loop
-updateCalculations();
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-stack);
+    line-height: 1.6;
+    padding: 2rem 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   Tab Navigation Architecture
+   ========================================================================== */
+.tab-navigation {
+    display: flex;
+    gap: 0.5rem;
+    background-color: var(--bg-card);
+    padding: 0.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+    overflow-x: auto;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: calc(var(--radius) - 4px);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-input);
+}
+
+.tab-btn.active {
+    color: var(--text-primary);
+    background-color: var(--accent-primary);
+}
+
+/* ==========================================================================
+   Distinct Info Blocks (Content Layout)
+   ========================================================================== */
+.info-block {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.info-block h2, .info-block h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.25rem;
+    color: var(--text-primary);
+    border-left: 4px solid var(--accent-primary);
+    padding-left: 0.75rem;
+}
+
+/* ==========================================================================
+   Tables & Interactive Input Fields
+   ========================================================================== */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+th {
+    text-align: left;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 1rem;
+}
+
+td {
+    padding: 0.5rem 0.25rem;
+}
+
+/* Sleek inputs that blend perfectly */
+input[type="text"], input[type="number"] {
+    width: 100%;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    font-family: var(--font-stack);
+    font-size: 0.95rem;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+input[type="text"]:focus, input[type="number"]:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+/* Read-only output calculations styling */
+.cal-output-field {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    font-weight: 700;
+    color: var(--accent-hover);
+    text-align: right;
+    pointer-events: none;
+}
+
+/* Total row designs */
+.total-row td {
+    font-weight: 700;
+    border-top: 2px solid var(--border-color);
+    padding-top: 1rem;
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   Matrix & Summary Panels
+   ========================================================================== */
+.matrix-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+}
+
+.matrix-card {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.matrix-card .value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0.25rem 0;
+}
+
+/* ==========================================================================
+   Chart & Performance Container
+   ========================================================================== */
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 380px; /* Forces dynamic aspect alignment ratios */
+}
+
+/* Clean utility hiding class */
+.hidden-tab {
+    display: none !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    body { padding: 1rem 0.5rem; }
+    .info-block { padding: 1rem; }
+    th { display: none; } /* Stack elements elegantly on small viewports */
+    td { display: block; width: 100%; padding: 0.25rem 0; }
+    .cal-output-field { text-align: left; padding-left: 1rem; }
+}
