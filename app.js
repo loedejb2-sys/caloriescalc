@@ -5,9 +5,9 @@ const calorieChart = new Chart(ctx, {
     data: {
         labels: ['Ideal', 'Prescribed', 'Actual', 'Difference'],
         datasets: [
-            { label: 'Breakfast', data: [1000, 700, 630, 70], backgroundColor: '#4d7c59' },
-            { label: 'Lunch', data: [1500, 770, 780, -10], backgroundColor: '#8bb381' },
-            { label: 'Dinner', data: [1500, 870, 655, 215], backgroundColor: '#b9ca9c' }
+            { label: 'Breakfast', data: [0, 0, 0, 0], backgroundColor: '#4d7c59' },
+            { label: 'Lunch', data: [0, 0, 0, 0], backgroundColor: '#8bb381' },
+            { label: 'Dinner', data: [0, 0, 0, 0], backgroundColor: '#b9ca9c' }
         ]
     },
     options: {
@@ -22,10 +22,9 @@ const calorieChart = new Chart(ctx, {
     }
 });
 
-// Master Database Object
+// Flat database where sized variations will be compiled
 const foodDatabase = {};
 
-// Foundational structural lists to procedurally build 1,000 distinct items
 const bases = [
     { name: "toast", cal: 100 }, { name: "egg", cal: 70 }, { name: "scrambled eggs", cal: 70 },
     { name: "bacon", cal: 60 }, { name: "orange juice", cal: 110 }, { name: "grilled chicken", cal: 60 },
@@ -46,30 +45,41 @@ const descriptors = [
     "seasoned", "marinated", "shredded", "sliced", "diced", "mashed", "pureed", "creamy"
 ];
 
-// 1. Procedurally generate 1,000 unique core fitness/nutrition combinations
+const sizes = [
+    { prefix: "medium ", multiplier: 0.85 },
+    { prefix: "large ", multiplier: 1.00 },
+    { prefix: "extra large ", multiplier: 1.15 }
+];
+
+function injectWithVariants(name, baseCalories) {
+    sizes.forEach(sz => {
+        const variantName = `${sz.prefix}${name}`;
+        foodDatabase[variantName] = Math.max(10, Math.round(baseCalories * sz.multiplier));
+    });
+    foodDatabase[name] = Math.round(baseCalories);
+}
+
 let baseCount = 0;
 while (baseCount < 1000) {
     const base = bases[baseCount % bases.length];
     const d1 = descriptors[Math.floor(baseCount / bases.length) % descriptors.length];
     const d2 = descriptors[(Math.floor(baseCount / bases.length) + 1) % descriptors.length];
     
-    // Mix items using distinct descriptor combinations
     let uniqueName = `${d1} ${base.name}`;
     if (baseCount >= bases.length * descriptors.length) {
         uniqueName = `${d1} ${d2} ${base.name}`;
     }
 
-    if (!foodDatabase[uniqueName]) {
-        // Apply slight calorie variations based on descriptors to keep data unique
+    if (!foodDatabase[`large ${uniqueName}`]) {
         const variance = d1.includes("low fat") || d1.includes("diet") || d1.includes("light") ? -25 : 15;
-        foodDatabase[uniqueName] = Math.max(20, base.cal + (baseCount % variance));
+        const calculatedBaseCal = Math.max(20, base.cal + (baseCount % variance));
+        injectWithVariants(uniqueName, calculatedBaseCal);
         baseCount++;
     } else {
-        baseCount++; // Prevent infinite loops if duplicate names occur
+        baseCount++; 
     }
 }
 
-// 2. Procedurally generate 500 everyday/random junk food items and snacks
 const randomBases = [
     { name: "pizza slice", cal: 285 }, { name: "burger", cal: 540 }, { name: "french fries", cal: 365 },
     { name: "potato chips", cal: 150 }, { name: "chocolate bar", cal: 220 }, { name: "soda can", cal: 140 },
@@ -91,22 +101,41 @@ while (randomCount < 500) {
     const brand = randomBrands[Math.floor(randomCount / randomBases.length) % randomBrands.length];
     
     const randomName = `${brand} ${rBase.name}`;
-    if (!foodDatabase[randomName]) {
-        foodDatabase[randomName] = Math.max(50, rBase.cal + (randomCount % 40));
+    if (!foodDatabase[`large ${randomName}`]) {
+        const calculatedBaseCal = Math.max(50, rBase.cal + (randomCount % 40));
+        injectWithVariants(randomName, calculatedBaseCal);
         randomCount++;
     } else {
         randomCount++;
     }
 }
 
-// Map base terms directly for instant user matching convenience
-bases.forEach(b => { if (!foodDatabase[b.name]) foodDatabase[b.name] = b.cal; });
-randomBases.forEach(rb => { if (!foodDatabase[rb.name]) foodDatabase[rb.name] = rb.cal; });
+bases.forEach(b => injectWithVariants(b.name, b.cal));
+randomBases.forEach(rb => injectWithVariants(rb.name, rb.cal));
 
-console.log(`Database generated successfully. Total active database items: ${Object.keys(foodDatabase).length}`);
+// Fully Universal Dynamic Calculation Engine
+function calculateDynamicTargets() {
+    // Reads whatever parameters are typed live inside the input elements
+    const age = parseFloat(document.getElementById('profile-age')?.value) || 18;
+    const weight = parseFloat(document.getElementById('profile-weight')?.value) || 75;
+    const height = parseFloat(document.getElementById('profile-height')?.value) || 180;
+    const activity = parseFloat(document.getElementById('profile-activity')?.value) || 1.55;
 
-// Central dynamic math logic engine
+    // Universal Mifflin-St Jeor Equation Matrix
+    const bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+    const totalDailyTDEE = Math.round(bmr * activity);
+
+    // Splits allocations dynamically based on calculated totals
+    return {
+        breakfast: Math.round(totalDailyTDEE * 0.25), 
+        lunch: Math.round(totalDailyTDEE * 0.40),     
+        dinner: Math.round(totalDailyTDEE * 0.35)     
+    };
+}
+
+// Central processing engine handling math changes smoothly
 function updateCalculations() {
+    const dynamicIdeals = calculateDynamicTargets();
     const meals = ['breakfast', 'lunch', 'dinner'];
     const actuals = { breakfast: 0, lunch: 0, dinner: 0 };
 
@@ -119,13 +148,11 @@ function updateCalculations() {
             const calOutput = row.querySelector('.cal-output-field');
             
             let baseCalories = 0;
-
             if (foodDatabase.hasOwnProperty(foodName)) {
                 baseCalories = foodDatabase[foodName];
             } else {
-                // Fuzzy string matcher
                 for (const key in foodDatabase) {
-                    if (foodName.includes(key) && key.length > 2) {
+                    if (foodName.includes(key) && key.length > 3) {
                         baseCalories = foodDatabase[key];
                         break;
                     }
@@ -137,31 +164,38 @@ function updateCalculations() {
             actuals[meal] += finalRowCalories;
         });
 
-        document.getElementById(`total-${meal}`).innerText = actuals[meal];
+        const totalElement = document.getElementById(`total-${meal}`);
+        if (totalElement) totalElement.innerText = actuals[meal];
     });
 
-    // Update Matrix Panels
-    document.getElementById('mockup-actual-b').innerText = actuals.breakfast;
-    document.getElementById('mockup-actual-l').innerText = actuals.lunch;
-    document.getElementById('mockup-actual-d').innerText = actuals.dinner;
+    const idealB = dynamicIdeals.breakfast;
+    const idealL = dynamicIdeals.lunch;
+    const idealD = dynamicIdeals.dinner;
 
-    let idealB = Number(document.querySelector('.mockup-input[data-type="ideal"][data-meal="0"]').value) || 0;
-    let idealL = Number(document.querySelector('.mockup-input[data-type="ideal"][data-meal="1"]').value) || 0;
-    let idealD = Number(document.querySelector('.mockup-input[data-type="ideal"][data-meal="2"]').value) || 0;
+    // Reflect freshly calculated values down into tracking panels
+    const idealInputB = document.querySelector('.mockup-input[data-type="ideal"][data-meal="0"]');
+    if (idealInputB) idealInputB.value = idealB;
+    const idealInputL = document.querySelector('.mockup-input[data-type="ideal"][data-meal="1"]');
+    if (idealInputL) idealInputL.value = idealL;
+    const idealInputD = document.querySelector('.mockup-input[data-type="ideal"][data-meal="2"]');
+    if (idealInputD) idealInputD.value = idealD;
 
-    let prescribedB = Number(document.querySelector('.mockup-input[data-type="prescribed"][data-meal="0"]').value) || 0;
-    let prescribedL = Number(document.querySelector('.mockup-input[data-type="prescribed"][data-meal="1"]').value) || 0;
-    let prescribedD = Number(document.querySelector('.mockup-input[data-type="prescribed"][data-meal="2"]').value) || 0;
+    let prescribedB = Number(document.querySelector('.mockup-input[data-type="prescribed"][data-meal="0"]')?.value) || 0;
+    let prescribedL = Number(document.querySelector('.mockup-input[data-type="prescribed"][data-meal="1"]')?.value) || 0;
+    let prescribedD = Number(document.querySelector('.mockup-input[data-type="prescribed"][data-meal="2"]')?.value) || 0;
 
     let diffB = idealB - actuals.breakfast;
     let diffL = idealL - actuals.lunch;
     let diffD = idealD - actuals.dinner;
 
-    document.getElementById('mockup-diff-b').innerText = diffB;
-    document.getElementById('mockup-diff-l').innerText = diffL;
-    document.getElementById('mockup-diff-d').innerText = diffD;
+    if (document.getElementById('mockup-actual-b')) document.getElementById('mockup-actual-b').innerText = actuals.breakfast;
+    if (document.getElementById('mockup-actual-l')) document.getElementById('mockup-actual-l').innerText = actuals.lunch;
+    if (document.getElementById('mockup-actual-d')) document.getElementById('mockup-actual-d').innerText = actuals.dinner;
+    if (document.getElementById('mockup-diff-b')) document.getElementById('mockup-diff-b').innerText = diffB;
+    if (document.getElementById('mockup-diff-l')) document.getElementById('mockup-diff-l').innerText = diffL;
+    if (document.getElementById('mockup-diff-d')) document.getElementById('mockup-diff-d').innerText = diffD;
 
-    // Send arrays straight to Chart JS
+    // Stream dynamic values straight to chart configuration
     calorieChart.data.datasets[0].data = [idealB, prescribedB, actuals.breakfast, diffB];
     calorieChart.data.datasets[1].data = [idealL, prescribedL, actuals.lunch, diffL];
     calorieChart.data.datasets[2].data = [idealD, prescribedD, actuals.dinner, diffD];
@@ -169,24 +203,24 @@ function updateCalculations() {
     calorieChart.update();
 }
 
-// Global live update hook
+// Global broad input capture handler
 document.body.addEventListener('input', function(e) {
     if (e.target.classList.contains('food-input') || 
         e.target.classList.contains('amount-input') || 
-        e.target.classList.contains('mockup-input')) {
+        e.target.classList.contains('mockup-input') ||
+        ['profile-age', 'profile-weight', 'profile-height', 'profile-activity'].includes(e.target.id)) {
         updateCalculations();
     }
 });
 
-// Run computations immediately on startup
+// Run calculation pipelines immediately on load execution
 updateCalculations();
-// Tab Switching Infrastructure Execution
-function switchTab(tabId) {
-    // 1. Manage Active Class on Buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    event.currentTarget.classList.add('active');
 
-    // 2. Map structural view states to CSS selectors
+// Tab Switch Functionality Helper
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    if (window.event) window.event.currentTarget.classList.add('active');
+
     const mealBlock = document.querySelector('.meal-section');
     const chartBlock = document.querySelector('.chart-section');
     const matrixBlock = document.querySelector('.matrix-section');
