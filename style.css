@@ -1,26 +1,30 @@
 /* ==========================================================================
-   Design System & Tokens
+   Design Foundations & Color Space
    ========================================================================== */
 :root {
     --bg-main: #111613;
-    --bg-card: #19211c;
-    --bg-input: #222c26;
-    --border-color: #2c3a31;
+    --bg-card: #18201b;
+    --bg-input: #212b25;
+    --border-color: #2b3931;
     
-    --text-primary: #f0f5f1;
-    --text-muted: #9fb3a6;
+    --text-primary: #f3f7f4;
+    --text-muted: #9bb0a3;
     
-    --accent-primary: #4d9c62;
-    --accent-hover: #5cb875;
-    --accent-dim: rgba(77, 156, 98, 0.15);
-    --danger-color: #e05c5c;
-    --danger-hover: #ff7373;
+    --accent-primary: #52a469;
+    --accent-hover: #63bf7c;
+    --accent-dim: rgba(82, 164, 105, 0.15);
+    --danger-color: #e25c5c;
+    --danger-hover: #f07373;
     
-    --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --radius: 12px;
+    --font-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --radius-lg: 14px;
+    --radius-sm: 8px;
     --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ==========================================================================
+   Global Layout & Resets
+   ========================================================================== */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -31,50 +35,40 @@ body {
     background-color: var(--bg-main);
     color: var(--text-primary);
     font-family: var(--font-stack);
-    line-height: 1.6;
-    padding: 2.5rem 1.5rem;
-    max-width: 1200px;
+    line-height: 1.5;
+    padding: 2rem 1.5rem;
+    max-width: 1000px;
     margin: 0 auto;
-    -webkit-font-smoothing: antialiased;
 }
 
-/* ==========================================================================
-   Structural Typography Header
-   ========================================================================== */
-.main-header {
+/* App Header styling */
+.app-header {
+    text-align: center;
     margin-bottom: 2.5rem;
 }
 
-.main-header h1 {
-    font-size: 2.25rem;
+.app-header h1 {
+    font-size: 2.5rem;
     font-weight: 800;
     letter-spacing: -0.03em;
+    color: var(--text-primary);
 }
 
-.main-header h1 span {
-    color: var(--accent-primary);
-    font-size: 1rem;
-    vertical-align: super;
-    background: var(--accent-dim);
-    padding: 0.2rem 0.5rem;
-    border-radius: 6px;
-}
-
-.main-header p {
+.app-header p {
     color: var(--text-muted);
     font-size: 1rem;
     margin-top: 0.25rem;
 }
 
 /* ==========================================================================
-   Tab Navigation & Buttons
+   Navigation Tabs
    ========================================================================== */
 .tab-navigation {
     display: flex;
     gap: 0.5rem;
     background-color: var(--bg-card);
     padding: 0.5rem;
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     margin-bottom: 2rem;
     overflow-x: auto;
@@ -84,13 +78,12 @@ body {
     background: none;
     border: none;
     color: var(--text-muted);
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     font-size: 0.95rem;
     font-weight: 600;
-    border-radius: calc(var(--radius) - 4px);
+    border-radius: calc(var(--radius-lg) - 4px);
     cursor: pointer;
     transition: var(--transition);
-    white-space: nowrap;
 }
 
 .tab-btn:hover {
@@ -103,211 +96,222 @@ body {
     background-color: var(--accent-primary);
 }
 
-.btn-secondary {
-    background-color: var(--bg-input);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 0.6rem 1.25rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: var(--transition);
-}
-
-.btn-secondary:hover {
-    border-color: var(--accent-primary);
-    color: var(--accent-hover);
-}
-
-.btn-delete {
-    background: none;
-    border: none;
-    color: var(--danger-color);
-    font-weight: bold;
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    transition: var(--transition);
-}
-
-.btn-delete:hover {
-    color: var(--danger-hover);
-    background-color: rgba(224, 92, 92, 0.1);
-}
-
 /* ==========================================================================
-   Modular Info Blocks
+   Content Blocks (Cards)
    ========================================================================== */
 .info-block {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
     padding: 2rem;
     margin-bottom: 2rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.24);
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
 }
 
 .info-block h2 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
     margin-bottom: 1.5rem;
     border-left: 4px solid var(--accent-primary);
     padding-left: 0.75rem;
 }
 
-/* Grid Patterns */
+.subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    margin-top: -1rem;
+}
+
+/* Grids & Forms */
 .profile-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1.25rem;
 }
 
-.profile-grid label, .matrix-section label {
-    display: block;
-    color: var(--text-muted);
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
     font-size: 0.85rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
+    color: var(--text-muted);
 }
 
 /* ==========================================================================
-   Form Controls
+   Interactive Inputs & Selector Overrides
    ========================================================================== */
-input[type="text"], input[type="number"], select {
-    width: 100%;
+input, select {
     background-color: var(--bg-input);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
     font-family: var(--font-stack);
     font-size: 0.95rem;
-    border-radius: 8px;
     transition: var(--transition);
+    width: 100%;
 }
 
-input[type="text"]:focus, input[type="number"]:focus, select:focus {
+input:focus, select:focus {
     outline: none;
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
 /* ==========================================================================
-   Table Presentation Elements
+   Dynamic Meal Section & Card Layouts
    ========================================================================== */
-.meal-group {
-    margin-bottom: 2.25rem;
+.meal-card {
+    background-color: rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
-.meal-group h3 {
+.meal-card h3 {
     font-size: 1.15rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    display: flex;
-    justify-content: space-between;
+    margin-bottom: 1rem;
     color: var(--text-primary);
 }
 
-.meal-group h3 span {
-    color: var(--text-muted);
-    font-size: 0.95rem;
-    font-weight: 400;
-}
-
-table {
+.food-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 0.5rem;
+    border-collapse: collapse;
     margin-bottom: 1rem;
 }
 
-th {
-    text-align: left;
-    color: var(--text-muted);
+.food-table th {
     font-size: 0.8rem;
+    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 0.25rem 0.5rem;
+    text-align: left;
+    padding-bottom: 0.5rem;
 }
 
-td {
-    padding: 0.25rem 0.5rem;
+.food-table td {
+    padding: 0.5rem 0.25rem;
     vertical-align: middle;
 }
 
+/* Read-only dynamically updated outputs */
 .cal-output-field {
-    background: transparent !important;
+    background-color: transparent !important;
     border-color: transparent !important;
     font-weight: 700;
     color: var(--accent-hover);
     text-align: right;
     pointer-events: none;
-    user-select: none;
+}
+
+/* Button UI Components */
+.add-row-btn {
+    background: none;
+    border: 1px dashed var(--accent-primary);
+    color: var(--accent-hover);
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.add-row-btn:hover {
+    background-color: var(--accent-dim);
+    border-style: solid;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: var(--danger-color);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-btn:hover {
+    color: var(--danger-hover);
+    transform: scale(1.1);
 }
 
 /* ==========================================================================
-   Summary Card Grid Layout
+   Data Presentation Cards & Performance Metrics
    ========================================================================== */
 .matrix-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1.25rem;
-    margin-top: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
 }
 
 .matrix-card {
-    background-color: var(--bg-input);
+    background-color: rgba(0, 0, 0, 0.2);
     border: 1px solid var(--border-color);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     padding: 1.5rem;
-    text-align: center;
 }
 
 .matrix-card h4 {
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 0.05em;
-}
-
-.matrix-card .value {
-    font-size: 2.5rem;
-    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 1rem;
     color: var(--text-primary);
-    margin: 0.5rem 0;
 }
 
-.matrix-card p {
-    font-size: 0.9rem;
-    color: var(--text-muted);
+.value-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.diff-span {
+.value-row:last-child {
+    border-bottom: none;
+}
+
+.highlight {
+    color: var(--accent-hover);
     font-weight: 700;
 }
 
-/* ==========================================================================
-   Chart Architecture Frame
-   ========================================================================== */
+/* Control actions buttons */
+.control-btn {
+    background: none;
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.control-btn:hover {
+    background-color: rgba(226, 92, 92, 0.1);
+}
+
 .chart-container {
-    position: relative;
-    width: 100%;
     height: 380px;
 }
 
+/* Visibility management utility class */
 .hidden-tab {
     display: none !important;
 }
 
-/* Mobile responsive alignment */
-@media (max-width: 768px) {
-    body { padding: 1.5rem 0.75rem; }
+@media (max-width: 600px) {
+    body { padding: 1rem 0.5rem; }
     .info-block { padding: 1.25rem; }
-    th { display: none; }
-    td { display: block; width: 100% !important; padding: 0.4rem 0; text-align: left; }
-    .btn-delete { text-align: left; width: 100%; padding: 0.5rem 0; }
+    .food-table th { display: none; }
+    .food-table td { display: block; width: 100%; padding: 0.4rem 0; }
     .cal-output-field { text-align: left; }
 }
