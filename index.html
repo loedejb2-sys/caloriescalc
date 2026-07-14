@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Metabolic Engine & Calorie Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- Header & Navigation -->
+    <header class="main-header">
+        <h1>Metabolic Engine <span>v2.0</span></h1>
+        <p>Thermodynamic energy balance tracking & dynamic metabolic profiling.</p>
+    </header>
+
+    <div class="tab-navigation">
+        <button class="tab-btn active" onclick="switchTab('all')">Show All</button>
+        <button class="tab-btn" onclick="switchTab('profile')">User Profile</button>
+        <button class="tab-btn" onclick="switchTab('meals')">Meals & Entry</button>
+        <button class="tab-btn" onclick="switchTab('analytics')">Analytics Chart</button>
+        <button class="tab-btn" onclick="switchTab('matrix')">Macro Matrix</button>
+    </div>
+
+    <!-- 1. PROFILE SECTION -->
+    <section class="info-block profile-section">
+        <h2>Dynamic Metabolism Profile</h2>
+        <div class="profile-grid">
+            <div>
+                <label for="profile-age">Age (Years)</label>
+                <input type="number" id="profile-age" value="17" min="1" max="120">
+            </div>
+            <div>
+                <label for="profile-weight">Weight (kg)</label>
+                <input type="number" id="profile-weight" value="70" min="30" max="250">
+            </div>
+            <div>
+                <label for="profile-height">Height (cm)</label>
+                <input type="number" id="profile-height" value="175" min="100" max="250">
+            </div>
+            <div>
+                <label for="profile-activity">Daily Activity Level</label>
+                <select id="profile-activity">
+                    <option value="1.2">Sedentary (No Dedicated Exercise)</option>
+                    <option value="1.375">Light Activity (1-2 days/week)</option>
+                    <option value="1.55" selected>Moderate Activity (3-5 days/week weightlifting)</option>
+                    <option value="1.725">Heavy Activity (6-7 days/week intense training)</option>
+                    <option value="1.9">Extreme Athlete (Double Daily Training Sessions)</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. MEALS SECTION -->
+    <section class="info-block meal-section">
+        <h2>Meal Entries</h2>
+        
+        <!-- Breakfast -->
+        <div class="meal-group">
+            <h3>Breakfast <span>(Target: <span id="target-disp-breakfast">0</span> kcal)</span></h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 55%;">Food Name</th>
+                        <th style="width: 20%;">Qty / Serving Ratio</th>
+                        <th style="width: 15%; text-align: right;">Calories</th>
+                        <th style="width: 10%; text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="table-breakfast" data-meal="breakfast">
+                    <!-- Dynamic Rows Will Load Here -->
+                </tbody>
+            </table>
+            <button class="btn-secondary" onclick="addTableRow('breakfast')">+ Add Food Item</button>
+        </div>
+
+        <!-- Lunch -->
+        <div class="meal-group">
+            <h3>Lunch <span>(Target: <span id="target-disp-lunch">0</span> kcal)</span></h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 55%;">Food Name</th>
+                        <th style="width: 20%;">Qty / Serving Ratio</th>
+                        <th style="width: 15%; text-align: right;">Calories</th>
+                        <th style="width: 10%; text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="table-lunch" data-meal="lunch">
+                    <!-- Dynamic Rows Will Load Here -->
+                </tbody>
+            </table>
+            <button class="btn-secondary" onclick="addTableRow('lunch')">+ Add Food Item</button>
+        </div>
+
+        <!-- Dinner -->
+        <div class="meal-group">
+            <h3>Dinner <span>(Target: <span id="target-disp-dinner">0</span> kcal)</span></h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 55%;">Food Name</th>
+                        <th style="width: 20%;">Qty / Serving Ratio</th>
+                        <th style="width: 15%; text-align: right;">Calories</th>
+                        <th style="width: 10%; text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="table-dinner" data-meal="dinner">
+                    <!-- Dynamic Rows Will Load Here -->
+                </tbody>
+            </table>
+            <button class="btn-secondary" onclick="addTableRow('dinner')">+ Add Food Item</button>
+        </div>
+    </section>
+
+    <!-- 3. ANALYTICS SECTION -->
+    <section class="info-block chart-section">
+        <h2>Analytics Visualization</h2>
+        <div class="chart-container">
+            <canvas id="calorieChart"></canvas>
+        </div>
+    </section>
+
+    <!-- 4. MATRIX SECTION -->
+    <section class="info-block matrix-section">
+        <h2>System Macro Matrix</h2>
+        
+        <div style="margin-bottom: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div>
+                <label>Prescribed Breakfast Goal</label>
+                <input type="number" class="mockup-input" data-type="prescribed" data-meal="0" value="700">
+            </div>
+            <div>
+                <label>Prescribed Lunch Goal</label>
+                <input type="number" class="mockup-input" data-type="prescribed" data-meal="1" value="770">
+            </div>
+            <div>
+                <label>Prescribed Dinner Goal</label>
+                <input type="number" class="mockup-input" data-type="prescribed" data-meal="2" value="870">
+            </div>
+        </div>
+
+        <div class="matrix-container">
+            <div class="matrix-card">
+                <h4>Actual Breakfast Logged</h4>
+                <div class="value" id="mockup-actual-b">0</div>
+                <p>Diff vs Ideal: <span id="mockup-diff-b" class="diff-span">0</span> kcal</p>
+            </div>
+            <div class="matrix-card">
+                <h4>Actual Lunch Logged</h4>
+                <div class="value" id="mockup-actual-l">0</div>
+                <p>Diff vs Ideal: <span id="mockup-diff-l" class="diff-span">0</span> kcal</p>
+            </div>
+            <div class="matrix-card">
+                <h4>Actual Dinner Logged</h4>
+                <div class="value" id="mockup-actual-d">0</div>
+                <p>Diff vs Ideal: <span id="mockup-diff-d" class="diff-span">0</span> kcal</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- App Execution Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
