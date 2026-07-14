@@ -1,11 +1,11 @@
 // ==========================================================================
-// Chart.js Configuration Engine
+// Chart.js Setup
 // ==========================================================================
 const ctx = document.getElementById('calorieChart').getContext('2d');
 const calorieChart = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: ['Ideal Target', 'Prescribed Target', 'Actual Eaten', 'Difference (Ideal - Actual)'],
+        labels: ['Ideal Target', 'Prescribed Target', 'Actual Eaten', 'Difference'],
         datasets: [
             { label: 'Breakfast', data: [0, 0, 0, 0], backgroundColor: '#4d7c59' },
             { label: 'Lunch', data: [0, 0, 0, 0], backgroundColor: '#8bb381' },
@@ -27,123 +27,171 @@ const calorieChart = new Chart(ctx, {
             }
         },
         plugins: {
-            legend: { 
-                position: 'bottom', 
-                labels: { boxWidth: 12, color: '#f0f4f1' } 
-            }
+            legend: { position: 'bottom', labels: { boxWidth: 12, color: '#f0f4f1' } }
         }
     }
 });
 
 // ==========================================================================
-// Local Core Procedural Database (1,500 Items x 3 Sizes = 4,500 combinations)
+// Expansive Core Database (Calculated base per standard serving or 100g)
 // ==========================================================================
-const foodDatabase = {};
+const foodDatabase = {
+    // Proteins
+    "chicken": 165, "grilled chicken": 165, "chicken breast": 165, "chicken wings": 203,
+    "steak": 250, "beef": 250, "ground beef": 250, "ribeye": 290, "pork": 240, "pork chop": 245,
+    "salmon": 208, "baked salmon": 208, "tuna": 130, "cod": 82, "shrimp": 99,
+    "egg": 70, "scrambled eggs": 140, "boiled egg": 70, "egg whites": 17,
+    "whey powder": 120, "protein powder": 120, "protein bar": 200, "greek yogurt": 59, "yogurt": 61,
+    "tofu": 76, "tempeh": 193, "turkey": 135, "turkey breast": 104, "bacon": 110,
 
-const bases = [
-    { name: "toast", cal: 100 }, { name: "egg", cal: 70 }, { name: "scrambled eggs", cal: 70 },
-    { name: "bacon", cal: 60 }, { name: "orange juice", cal: 110 }, { name: "grilled chicken", cal: 60 },
-    { name: "brown rice", cal: 215 }, { name: "steamed broccoli", cal: 55 }, { name: "greek salad", cal: 150 },
-    { name: "baked salmon", cal: 50 }, { name: "mashed potatoes", cal: 210 }, { name: "steamed asparagus", cal: 40 },
-    { name: "dinner roll", cal: 110 }, { name: "apple", cal: 95 }, { name: "banana", cal: 105 },
-    { name: "whey powder", cal: 120 }, { name: "steak", cal: 250 }, { name: "oatmeal", cal: 150 },
-    { name: "milk", cal: 120 }, { name: "yogurt", cal: 130 }, { name: "almonds", cal: 160 },
-    { name: "turkey breast", cal: 90 }, { name: "sweet potato", cal: 110 }, { name: "avocado", cal: 240 },
-    { name: "protein bar", cal: 200 }
-];
+    // Carbs / Grains
+    "brown rice": 111, "white rice": 130, "rice": 130, "oatmeal": 150, "oats": 389,
+    "bread": 75, "toast": 75, "whole wheat bread": 69, "bagel": 250, "croissant": 270,
+    "pasta": 131, "spaghetti": 131, "macaroni": 131, "noodles": 138, "quinoa": 120,
+    "sweet potato": 86, "potato": 87, "mashed potatoes": 110, "french fries": 312,
+    "cereal": 379, "granola": 471, "pancakes": 227, "waffle": 291, "muffin": 377,
 
-const descriptors = [
-    "organic", "fresh", "diet", "premium", "low fat", "high protein", "roasted", "baked", 
-    "salted", "unsalted", "sweetened", "unsweetened", "spicy", "garlic", "honey", "maple", 
-    "smoked", "grilled", "steamed", "boiled", "crispy", "homemade", "gourmet", "classic", 
-    "light", "dark", "whole wheat", "gluten free", "natural", "extra", "raw", "cooked", 
-    "seasoned", "marinated", "shredded", "sliced", "diced", "mashed", "pureed", "creamy"
-];
+    // Fats / Nuts
+    "avocado": 160, "olive oil": 119, "butter": 100, "peanut butter": 94, "almond butter": 98,
+    "almonds": 164, "walnuts": 185, "cashews": 157, "peanuts": 161, "chia seeds": 138,
+    "cheese": 402, "cheddar": 402, "mozzarella": 300, "cream cheese": 342,
 
-const sizes = [
-    { prefix: "medium ", multiplier: 0.85 },
-    { prefix: "large ", multiplier: 1.00 },
-    { prefix: "extra large ", multiplier: 1.15 }
-];
+    // Fruits & Veggies
+    "apple": 52, "banana": 89, "orange": 47, "strawberries": 32, "blueberries": 57,
+    "grapes": 69, "watermelon": 30, "peach": 39, "pineapple": 50,
+    "broccoli": 34, "steamed broccoli": 35, "spinach": 23, "asparagus": 20, "cucumber": 15,
+    "tomato": 18, "carrots": 41, "bell pepper": 20, "onion": 40, "garlic": 149,
+    "salad": 15, "green salad": 15, "greek salad": 115, "caesar salad": 190,
 
-function injectWithVariants(name, baseCalories) {
-    sizes.forEach(sz => {
-        const variantName = `${sz.prefix}${name}`;
-        foodDatabase[variantName] = Math.max(10, Math.round(baseCalories * sz.multiplier));
-    });
-    foodDatabase[name] = Math.round(baseCalories);
-}
-
-let baseCount = 0;
-while (baseCount < 1000) {
-    const base = bases[baseCount % bases.length];
-    const d1 = descriptors[Math.floor(baseCount / bases.length) % descriptors.length];
-    const d2 = descriptors[(Math.floor(baseCount / bases.length) + 1) % descriptors.length];
-    
-    let uniqueName = `${d1} ${base.name}`;
-    if (baseCount >= bases.length * descriptors.length) {
-        uniqueName = `${d1} ${d2} ${base.name}`;
-    }
-
-    if (!foodDatabase[`large ${uniqueName}`]) {
-        const variance = d1.includes("low fat") || d1.includes("diet") || d1.includes("light") ? -25 : 15;
-        const calculatedBaseCal = Math.max(20, base.cal + (baseCount % variance));
-        injectWithVariants(uniqueName, calculatedBaseCal);
-        baseCount++;
-    } else {
-        baseCount++; 
-    }
-}
-
-const randomBases = [
-    { name: "pizza slice", cal: 285 }, { name: "burger", cal: 540 }, { name: "french fries", cal: 365 },
-    { name: "potato chips", cal: 150 }, { name: "chocolate bar", cal: 220 }, { name: "soda can", cal: 140 },
-    { name: "donut", cal: 250 }, { name: "cookie", cal: 130 }, { name: "ice cream scoop", cal: 145 },
-    { name: "gummy bears", cal: 120 }, { name: "popcorn packet", cal: 300 }, { name: "pretzel", cal: 110 },
-    { name: "hot dog", cal: 290 }, { name: "taco", cal: 210 }, { name: "nachos", cal: 350 },
-    { name: "pancakes", cal: 280 }, { name: "waffle", cal: 220 }, { name: "muffin", cal: 340 }
-];
-
-const randomBrands = [
-    "generic", "store brand", "vending machine", "fast food", "movie theater", "party style", 
-    "gas station", "bakery", "classic", "super", "mega", "double", "triple", "mini", "jumbo", 
-    "loaded", "cheesy", "bbq", "sour cream", "buffalo", "ranch", "caramel", "vanilla", "strawberry"
-];
-
-let randomCount = 0;
-while (randomCount < 500) {
-    const rBase = randomBases[randomCount % randomBases.length];
-    const brand = randomBrands[Math.floor(randomCount / randomBases.length) % randomBrands.length];
-    
-    const randomName = `${brand} ${rBase.name}`;
-    if (!foodDatabase[`large ${randomName}`]) {
-        const calculatedBaseCal = Math.max(50, rBase.cal + (randomCount % 40));
-        injectWithVariants(randomName, calculatedBaseCal);
-        randomCount++;
-    } else {
-        randomCount++;
-    }
-}
-
-bases.forEach(b => injectWithVariants(b.name, b.cal));
-randomBases.forEach(rb => injectWithVariants(rb.name, rb.cal));
+    // Snacks, Fast Food & Cheat Meals
+    "pizza": 266, "pizza slice": 285, "burger": 295, "cheeseburger": 303, "hot dog": 290,
+    "taco": 226, "nachos": 306, "potato chips": 536, "chocolate": 546, "chocolate bar": 220,
+    "cookie": 502, "donut": 452, "ice cream": 207, "gummy bears": 380, "popcorn": 375,
+    "soda": 41, "soda can": 140, "orange juice": 45, "milk": 42
+};
 
 // ==========================================================================
-// Core State & LocalStorage Management
+// Smart Natural Language Processing (NLP) Parser Engine
+// ==========================================================================
+function parseNaturalInput(inputStr) {
+    const text = inputStr.toLowerCase().trim();
+    if (!text) return 0;
+
+    let multiplier = 1.0;
+    let baseCalories = 0;
+    let matchedFood = "";
+
+    // 1. Check for explicit gram metrics (e.g. "150g", "150 grams", "150 gram")
+    const gramMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:g|gram|grams)/);
+    if (gramMatch) {
+        const grams = parseFloat(gramMatch[1]);
+        multiplier = grams / 100; // Database values are normalized per 100g where applicable
+    } 
+    // 2. Check for numeric digit quantities (e.g. "2 eggs", "1.5 pizzas")
+    else {
+        const qtyMatch = text.match(/^(\d+(?:\.\d+)?)\s+/);
+        if (qtyMatch) {
+            multiplier = parseFloat(qtyMatch[1]);
+        }
+    }
+
+    // 3. Vague estimation terms translation matrix
+    const vaguePhrases = [
+        { phrase: "handful of", scale: 1.2 },
+        { phrase: "handful", scale: 1.2 },
+        { phrase: "bunch of", scale: 1.5 },
+        { phrase: "slice of", scale: 1.0 },
+        { phrase: "slices of", scale: 2.0 },
+        { phrase: "plate of", scale: 2.5 },
+        { phrase: "bowl of", scale: 2.0 },
+        { phrase: "half a", scale: 0.5 },
+        { phrase: "half", scale: 0.5 },
+        { phrase: "quarter of a", scale: 0.25 },
+        { phrase: "tiny bit of", scale: 0.3 },
+        { phrase: "little bit of", scale: 0.5 },
+        { phrase: "some", scale: 1.0 },
+        { phrase: "a lot of", scale: 2.0 },
+        { phrase: "mountain of", scale: 3.0 },
+        { phrase: "couple of", scale: 2.0 },
+        { phrase: "few", scale: 2.0 },
+        { phrase: "bite of", scale: 0.2 }
+    ];
+
+    for (const item of vaguePhrases) {
+        if (text.includes(item.phrase)) {
+            // Only use vague scale multiplier if we didn't find a precise number first
+            if (!gramMatch && !text.match(/^(\d+(?:\.\d+)?)\s+/)) {
+                multiplier = item.scale;
+            }
+            break;
+        }
+    }
+
+    // Size Adjectives modifier overrides
+    if (text.includes("extra large") || text.includes("huge") || text.includes("xl")) {
+        multiplier *= 1.3;
+    } else if (text.includes("large") || text.includes("big")) {
+        multiplier *= 1.15;
+    } else if (text.includes("medium")) {
+        multiplier *= 1.0;
+    } else if (text.includes("small") || text.includes("tiny")) {
+        multiplier *= 0.7;
+    }
+
+    // Descriptor overrides
+    let densityModifier = 1.0;
+    if (text.includes("low fat") || text.includes("diet") || text.includes("light") || text.includes("skim")) {
+        densityModifier = 0.75;
+    } else if (text.includes("creamy") || text.includes("cheesy") || text.includes("loaded") || text.includes("double")) {
+        densityModifier = 1.35;
+    }
+
+    // 4. Smart Food matching loop
+    // Search for longest database key matching first to handle compound words safely
+    const keysSortedByLength = Object.keys(foodDatabase).sort((a, b) => b.length - a.length);
+    for (const key of keysSortedByLength) {
+        if (text.includes(key)) {
+            matchedFood = key;
+            baseCalories = foodDatabase[key];
+            break;
+        }
+    }
+
+    // Fallback: If no direct food match is found, check if we can match root parts
+    if (!matchedFood) {
+        for (const key of keysSortedByLength) {
+            const words = key.split(' ');
+            for (const word of words) {
+                if (word.length > 3 && text.includes(word)) {
+                    matchedFood = key;
+                    baseCalories = foodDatabase[key];
+                    break;
+                }
+            }
+            if (matchedFood) break;
+        }
+    }
+
+    // Final calculations pipeline
+    const finalCalories = Math.round(baseCalories * multiplier * densityModifier);
+    return finalCalories;
+}
+
+// ==========================================================================
+// Core State Management (Saves directly to LocalStorage)
 // ==========================================================================
 let appState = {
     profile: { age: 17, weight: 70, height: 175, activity: 1.55 },
     meals: {
-        breakfast: [{ food: "medium egg", amount: 2 }, { food: "organic toast", amount: 2 }],
-        lunch: [{ food: "large chicken", amount: 1.5 }, { food: "brown rice", amount: 1 }],
-        dinner: [{ food: "fresh grilled chicken", amount: 1 }, { food: "steamed broccoli", amount: 2 }]
+        breakfast: [{ text: "2 organic boiled eggs" }, { text: "150g of greek yogurt" }],
+        lunch: [{ text: "a large plate of grilled chicken breast" }, { text: "100g brown rice" }],
+        dinner: [{ text: "a slice of cheese pizza" }, { text: "some steamed broccoli" }]
     },
     prescribed: { breakfast: 700, lunch: 770, dinner: 870 }
 };
 
-// Loads saved profile data or meal templates from storage
 function loadState() {
-    const saved = localStorage.getItem('sagetraker_state_v2');
+    const saved = localStorage.getItem('sagetraker_state_v3');
     if (saved) {
         try {
             appState = JSON.parse(saved);
@@ -156,7 +204,7 @@ function loadState() {
 }
 
 function saveState() {
-    localStorage.setItem('sagetraker_state_v2', JSON.stringify(appState));
+    localStorage.setItem('sagetraker_state_v3', JSON.stringify(appState));
 }
 
 function syncProfileUI() {
@@ -171,7 +219,7 @@ function syncProfileUI() {
 }
 
 // ==========================================================================
-// UI Rendering Engine
+// UI Rendering Logic
 // ==========================================================================
 function renderAllMeals() {
     const meals = ['breakfast', 'lunch', 'dinner'];
@@ -183,10 +231,7 @@ function renderAllMeals() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>
-                    <input type="text" class="food-input" value="${item.food}" placeholder="Type ingredient name..." oninput="updateItem('${meal}', ${index}, 'food', this.value)">
-                </td>
-                <td>
-                    <input type="number" class="amount-input" value="${item.amount}" step="0.1" min="0" oninput="updateItem('${meal}', ${index}, 'amount', this.value)">
+                    <input type="text" class="food-input" value="${item.text}" placeholder="Type naturally, e.g. a handful of almonds..." oninput="updateItem('${meal}', ${index}, this.value)">
                 </td>
                 <td>
                     <input type="text" class="cal-output-field" readonly value="0">
@@ -202,7 +247,7 @@ function renderAllMeals() {
 }
 
 function addFoodRow(meal) {
-    appState.meals[meal].push({ food: '', amount: 1 });
+    appState.meals[meal].push({ text: '' });
     saveState();
     renderAllMeals();
 }
@@ -213,18 +258,14 @@ function deleteFoodRow(meal, index) {
     renderAllMeals();
 }
 
-function updateItem(meal, index, field, value) {
-    if (field === 'amount') {
-        appState.meals[meal][index].amount = parseFloat(value) || 0;
-    } else {
-        appState.meals[meal][index].food = value;
-    }
+function updateItem(meal, index, val) {
+    appState.meals[meal][index].text = val;
     saveState();
     updateCalculations();
 }
 
 // ==========================================================================
-// Dynamic Calculations Pipeline
+// Central Live Calculations Loop
 // ==========================================================================
 function calculateDynamicTargets() {
     const age = parseFloat(document.getElementById('profile-age').value) || 17;
@@ -232,7 +273,6 @@ function calculateDynamicTargets() {
     const height = parseFloat(document.getElementById('profile-height').value) || 175;
     const activity = parseFloat(document.getElementById('profile-activity').value) || 1.55;
 
-    // Scientific TDEE (Thermodynamic daily energy expenditure formula)
     const bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
     const totalDailyTDEE = Math.round(bmr * activity);
 
@@ -252,35 +292,21 @@ function updateCalculations() {
         const rows = document.querySelectorAll(`tbody[data-meal="${meal}"] tr`);
         
         rows.forEach((row, index) => {
-            const foodName = row.querySelector('.food-input').value.trim().toLowerCase();
-            const amount = parseFloat(row.querySelector('.amount-input').value) || 0;
+            const textInput = row.querySelector('.food-input').value;
             const calOutput = row.querySelector('.cal-output-field');
             
-            let baseCalories = 0;
-            if (foodDatabase.hasOwnProperty(foodName)) {
-                baseCalories = foodDatabase[foodName];
-            } else {
-                // Perform smart matching search on keywords
-                for (const key in foodDatabase) {
-                    if (foodName.includes(key) && key.length > 3) {
-                        baseCalories = foodDatabase[key];
-                        break;
-                    }
-                }
-            }
-
-            const finalRowCalories = Math.round(baseCalories * amount);
-            if (calOutput) calOutput.value = finalRowCalories;
-            actuals[meal] += finalRowCalories;
+            // Send the raw natural string directly to our smart parser
+            const calculatedCal = parseNaturalInput(textInput);
+            
+            if (calOutput) calOutput.value = `${calculatedCal} kcal`;
+            actuals[meal] += calculatedCal;
         });
     });
 
-    // Extract updated target balances
     const idealB = dynamicIdeals.breakfast;
     const idealL = dynamicIdeals.lunch;
     const idealD = dynamicIdeals.dinner;
 
-    // Output target variables safely into metric panels
     document.getElementById('target-val-b').innerText = `${idealB} kcal`;
     document.getElementById('target-val-l').innerText = `${idealL} kcal`;
     document.getElementById('target-val-d').innerText = `${idealD} kcal`;
@@ -303,7 +329,7 @@ function updateCalculations() {
     document.getElementById('mockup-diff-l').innerText = `${diffL} kcal`;
     document.getElementById('mockup-diff-d').innerText = `${diffD} kcal`;
 
-    // Direct interface data upload stream to Chart datasets
+    // Push calculated metrics directly down to Chart.js API datasets
     calorieChart.data.datasets[0].data = [idealB, prescribedB, actuals.breakfast, diffB];
     calorieChart.data.datasets[1].data = [idealL, prescribedL, actuals.lunch, diffL];
     calorieChart.data.datasets[2].data = [idealD, prescribedD, actuals.dinner, diffD];
@@ -312,7 +338,7 @@ function updateCalculations() {
 }
 
 // ==========================================================================
-// Dashboard General Event Listeners
+// Dashboard General Event Handlers
 // ==========================================================================
 document.body.addEventListener('input', function(e) {
     if (['profile-age', 'profile-weight', 'profile-height', 'profile-activity'].includes(e.target.id)) {
@@ -331,7 +357,7 @@ document.body.addEventListener('input', function(e) {
 
 function clearAllData() {
     if (confirm("This will clear your local logs and reset profile metrics. Continue?")) {
-        localStorage.removeItem('sagetraker_state_v2');
+        localStorage.removeItem('sagetraker_state_v3');
         appState = {
             profile: { age: 17, weight: 70, height: 175, activity: 1.55 },
             meals: { breakfast: [], lunch: [], dinner: [] },
@@ -343,9 +369,6 @@ function clearAllData() {
     }
 }
 
-// ==========================================================================
-// Tab Switching Architecture
-// ==========================================================================
 function switchTab(tabId) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     if (window.event) window.event.currentTarget.classList.add('active');
@@ -368,7 +391,6 @@ function switchTab(tabId) {
     }
 }
 
-// Startup Initialization Execution
 window.onload = function() {
     loadState();
 };
