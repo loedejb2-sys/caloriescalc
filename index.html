@@ -5,18 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Fitness & Calorie Planner</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Chart.js for beautiful analytics visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <!-- Header & App Title -->
     <header class="app-header">
         <h1>SageTracker</h1>
         <p>Adaptive Calorie & Macro Planning Matrix</p>
     </header>
 
-    <!-- Navigation Tab Bar -->
     <div class="tab-navigation">
         <button class="tab-btn active" onclick="switchTab('all')">Show All</button>
         <button class="tab-btn" onclick="switchTab('profile')">My Profile</button>
@@ -25,7 +22,7 @@
         <button class="tab-btn" onclick="switchTab('matrix')">Macro Matrix</button>
     </div>
 
-    <!-- TAB 1: User Profile Section -->
+    <!-- Profile Section -->
     <section class="info-block profile-section" id="section-profile">
         <h2>Metabolism Profile</h2>
         <div class="profile-grid">
@@ -54,10 +51,10 @@
         </div>
     </section>
 
-    <!-- TAB 2: Food Entry & Meal Sections -->
+    <!-- Food Entry Log with Natural Language Inputs -->
     <section class="info-block meal-section" id="section-meals">
         <h2>Daily Food Entry Log</h2>
-        <p class="subtitle">Search for items like "medium egg", "large pizza slice", or "extra large grilled chicken".</p>
+        <p class="subtitle">Type naturally: e.g., "150g of grilled chicken", "a handful of almonds", "3 slices of organic bacon", or "some yogurt".</p>
 
         <!-- Breakfast Card -->
         <div class="meal-card" data-meal="breakfast">
@@ -65,15 +62,12 @@
             <table class="food-table">
                 <thead>
                     <tr>
-                        <th style="width: 50%;">Food / Ingredient</th>
-                        <th style="width: 20%;">Qty / Servings</th>
-                        <th style="width: 20%; text-align: right;">Calories</th>
+                        <th style="width: 70%;">What did you eat? (Describe amount & food)</th>
+                        <th style="width: 20%; text-align: right;">Est. Calories</th>
                         <th style="width: 10%;"></th>
                     </tr>
                 </thead>
-                <tbody id="list-breakfast" data-meal="breakfast">
-                    <!-- Dynamic Rows are generated here -->
-                </tbody>
+                <tbody id="list-breakfast" data-meal="breakfast"></tbody>
             </table>
             <button class="add-row-btn" onclick="addFoodRow('breakfast')">+ Add Breakfast Item</button>
         </div>
@@ -84,15 +78,12 @@
             <table class="food-table">
                 <thead>
                     <tr>
-                        <th style="width: 50%;">Food / Ingredient</th>
-                        <th style="width: 20%;">Qty / Servings</th>
-                        <th style="width: 20%; text-align: right;">Calories</th>
+                        <th style="width: 70%;">What did you eat? (Describe amount & food)</th>
+                        <th style="width: 20%; text-align: right;">Est. Calories</th>
                         <th style="width: 10%;"></th>
                     </tr>
                 </thead>
-                <tbody id="list-lunch" data-meal="lunch">
-                    <!-- Dynamic Rows are generated here -->
-                </tbody>
+                <tbody id="list-lunch" data-meal="lunch"></tbody>
             </table>
             <button class="add-row-btn" onclick="addFoodRow('lunch')">+ Add Lunch Item</button>
         </div>
@@ -103,21 +94,18 @@
             <table class="food-table">
                 <thead>
                     <tr>
-                        <th style="width: 50%;">Food / Ingredient</th>
-                        <th style="width: 20%;">Qty / Servings</th>
-                        <th style="width: 20%; text-align: right;">Calories</th>
+                        <th style="width: 70%;">What did you eat? (Describe amount & food)</th>
+                        <th style="width: 20%; text-align: right;">Est. Calories</th>
                         <th style="width: 10%;"></th>
                     </tr>
                 </thead>
-                <tbody id="list-dinner" data-meal="dinner">
-                    <!-- Dynamic Rows are generated here -->
-                </tbody>
+                <tbody id="list-dinner" data-meal="dinner"></tbody>
             </table>
             <button class="add-row-btn" onclick="addFoodRow('dinner')">+ Add Dinner Item</button>
         </div>
     </section>
 
-    <!-- TAB 3: Dynamic Charts & Visualization -->
+    <!-- Analytics Section -->
     <section class="info-block chart-section" id="section-analytics">
         <h2>Calorie Performance Analytics</h2>
         <div class="chart-container">
@@ -125,11 +113,10 @@
         </div>
     </section>
 
-    <!-- TAB 4: Macro Summary Matrix -->
+    <!-- Macro Matrix -->
     <section class="info-block matrix-section" id="section-matrix">
         <h2>Macro Energy Balance</h2>
         
-        <!-- Interactive target tuning panel -->
         <div style="margin-bottom: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
             <div>
                 <label style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Prescribed Breakfast Target</label>
@@ -146,7 +133,6 @@
         </div>
 
         <div class="matrix-container">
-            <!-- Breakfast Metrics -->
             <div class="matrix-card">
                 <h4>Breakfast Status</h4>
                 <div class="value-row">
@@ -163,7 +149,6 @@
                 </div>
             </div>
 
-            <!-- Lunch Metrics -->
             <div class="matrix-card">
                 <h4>Lunch Status</h4>
                 <div class="value-row">
@@ -180,7 +165,6 @@
                 </div>
             </div>
 
-            <!-- Dinner Metrics -->
             <div class="matrix-card">
                 <h4>Dinner Status</h4>
                 <div class="value-row">
@@ -199,7 +183,6 @@
         </div>
     </section>
 
-    <!-- Global App Control Buttons -->
     <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 3rem;">
         <button class="control-btn clear-btn" onclick="clearAllData()">Reset Dashboard Data</button>
     </div>
